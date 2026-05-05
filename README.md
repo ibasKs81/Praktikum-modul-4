@@ -8,47 +8,34 @@
 ---
 
 ## 📌 Deskripsi Repositori
-Repositori ini berisi *source code*, skematik rangkaian, dan dokumentasi hasil praktikum Modul I yang berfokus pada implementasi struktur kontrol percabangan (`if-else`) dan perulangan (`for`) menggunakan platform mikrokontroler Arduino. 
-
-Praktikum ini dirancang untuk memahami bagaimana pengambilan keputusan logika dan perulangan memengaruhi jalannya eksekusi program perangkat keras, khususnya dalam memanipulasi pin *Output* untuk menyalakan susunan komponen LED.
-
+Praktikum ini bertujuan untuk mengimplementasikan konfigurasi modul Analog to Digital Converter (ADC) dan teknik Pulse Width Modulation (PWM) pada Arduino. Percobaan melibatkan penggunaan potensiometer untuk menghasilkan tegangan analog yang kemudian dikonversi menjadi data digital untuk mengendalikan motor servo dan intensitas cahaya LED.
 ---
 ## 🔬 Analisis Percobaan 1
-### 1. Pada kondisi apa program masuk ke blok if? 
-Pada kondisi nilai delay sudah kurang atau saama dengan seratus 
-### 2. Pada kondisi apa program masuk ke blok else? 
+### 1. Apa fungsi perintah analogRead() pada rangkaian ini?
+Fungsi ini digunakan untuk membaca tegangan analog kontinu dari potensiometer dan menangkap amplitudo sinyal tersebut.
+### 2. Mengapa diperlukan fungsi map() dalam program tersebut?
 Pada kondisi nilai delay diatas 100 yang mana ketika baru menyala nilainya adalah 1000
 ### 3.  Apa fungsi dari perintah delay(timeDelay)? 
-Fungsi dari delay adalah mendefinisikan waktu yang akan dipakai untuk  menyalakan dan mematikan LED
-### 4.  Berikan penjelasan disetiap baris kode nya setalah  LED tidak langsung reset → tetapi berubah dari cepat → sedang → mati
+Fungsi map() diperlukan untuk mengonversi nilai digital hasil pembacaan ADC (0–1023) menjadi rentang nilai yang dapat dipahami oleh motor servo (dalam kasus ini dibatasi ke 30–150) sehingga terjadi sinkronisasi gerakan.
+### 4. Penjelasan Program Modifikasi:
+Program menggunakan fungsi map(val, 0, 1023, 30, 150) sehingga nilai ADC terendah (0) akan menghasilkan sudut 30° dan nilai tertinggi (1023) akan menghasilkan sudut 150°.
 ```cpp
-const int ledPin = 6;        // Pin digital tempat LED terhubung
-int timeDelay = 1000;        // Nilai awal delay (ms)
+#include <Servo.h>
+
+Servo myservo;  
+int potPin = A0;  // Input analog dari potensio [cite: 53]
+int val;    
 
 void setup() {
-  pinMode(ledPin, OUTPUT);   // Atur pin LED sebagai output
+  myservo.attach(9); // Servo terhubung ke pin PWM
 }
 
 void loop() {
-  // Nyalakan LED
-  digitalWrite(ledPin, HIGH);
-  delay(timeDelay);
-
-  // Matikan LED
-  digitalWrite(ledPin, LOW);
-  delay(timeDelay);
-
-  // Ubah pola delay setelah 1 siklus kedip
-  if (timeDelay <= 100) { 
-    delay(3000);             // jeda 3 detik sebelum reset
-    timeDelay = 1000;        // reset ke kondisi mati (awal)
-  } 
-  else if (timeDelay <= 500) {
-    timeDelay = 700;         // dari cepat → sedang
-  } 
-  else {
-    timeDelay -= 200;        // percepatan bertahap (1000 → 800 → 600 → dst)
-  }
+  val = analogRead(potPin);            // Membaca nilai ADC (0-1023)
+  // Modifikasi: Membatasi rentang sudut ke 30-150 derajat
+  val = map(val, 0, 1023, 30, 150);     
+  myservo.write(val);                  
+  delay(15);                           
 }
 ```
 ---

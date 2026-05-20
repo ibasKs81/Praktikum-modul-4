@@ -144,7 +144,7 @@ void loop() {
 ## 📸 Dokumentasi Praktikum
 ### 1. Dokumentasi Percobaan
 Percobaan 1:
-![Lampiran percobaan 1 Praktikum](WhatsApp%20Image%202026-04-07%20at%2013.12.22.jpeg)
+![Lampiran percobaan 1 Praktikum](587878913-d09394eb-b248-451f-9853-12f4221aa1a4.jpg)
 Percobaan 2: 
 ![Lampiran percobaan 2 Praktikum](WhatsApp%20Image%202026-04-07%20at%2013.12.27.jpeg)
 

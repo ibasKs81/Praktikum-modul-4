@@ -146,12 +146,6 @@ void loop() {
 Percobaan 1:
 ![Lampiran percobaan 1 Praktikum](587878913-d09394eb-b248-451f-9853-12f4221aa1a4.jpg)
 Percobaan 2: 
-![Lampiran percobaan 2 Praktikum](WhatsApp%20Image%202026-04-07%20at%2013.12.27.jpeg)
+![Lampiran percobaan 2 Praktikum](587879293-8a848cbe-2a8f-4c07-9303-132b897876d6.jpg)
 
-### 2. Skematik Rangkaian
-Skematik Rangkaian prcobaan 1
-![Skematik Rangkaian prcobaan 1](Screenshot%202026-04-08%20015201.png)
-Skematik Rangkaian prcobaan 2
-![Tautan Gambar Skematik_2 Di Sini](Screenshot%202026-04-08%20015551.png)
 
-*Laporan praktikum lengkap beserta analisis data tersedia pada direktori utama repositori ini dalam format dokumen.*

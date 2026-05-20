@@ -1,4 +1,5 @@
-# Praktikum Mikrokontroler - Modul I: Percabangan dan Perulangan
+# Praktikum Mikrokontroler - Modul I: Analog to Digital Converter (ADC) dan Pulse Width Modulation (PWM)
+
 
 **Nama:** Ibnu Abbas  
 **NIM:** H1H024038  
@@ -8,85 +9,135 @@
 ---
 
 ## 📌 Deskripsi Repositori
-Praktikum ini bertujuan untuk mengimplementasikan konfigurasi modul Analog to Digital Converter (ADC) dan teknik Pulse Width Modulation (PWM) pada Arduino. Percobaan melibatkan penggunaan potensiometer untuk menghasilkan tegangan analog yang kemudian dikonversi menjadi data digital untuk mengendalikan motor servo dan intensitas cahaya LED.
----
-## 🔬 Analisis Percobaan 1
-### 1. Apa fungsi perintah analogRead() pada rangkaian ini?
-Fungsi ini digunakan untuk membaca tegangan analog kontinu dari potensiometer dan menangkap amplitudo sinyal tersebut.
-### 2. Mengapa diperlukan fungsi map() dalam program tersebut?
-Pada kondisi nilai delay diatas 100 yang mana ketika baru menyala nilainya adalah 1000
-### 3.  Apa fungsi dari perintah delay(timeDelay)? 
-Fungsi map() diperlukan untuk mengonversi nilai digital hasil pembacaan ADC (0–1023) menjadi rentang nilai yang dapat dipahami oleh motor servo (dalam kasus ini dibatasi ke 30–150) sehingga terjadi sinkronisasi gerakan.
-### 4. Penjelasan Program Modifikasi:
-Program menggunakan fungsi map(val, 0, 1023, 30, 150) sehingga nilai ADC terendah (0) akan menghasilkan sudut 30° dan nilai tertinggi (1023) akan menghasilkan sudut 150°.
-```cpp
-#include <Servo.h>
+Repositori ini berisi source code, skematik rangkaian, dan dokumentasi hasil praktikum Modul 3 yang berfokus pada implementasi protokol komunikasi serial menggunakan antarmuka UART (Universal Asynchronous Receiver-Transmitter) dan I2C (Inter-Integrated Circuit) pada platform mikrokontroler Arduino Uno.
 
-Servo myservo;  
-int potPin = A0;  // Input analog dari potensio [cite: 53]
-int val;    
+Praktikum ini dirancang untuk memahami bagaimana mikrokontroler dapat menerima komando interaktif dari antarmuka komputer melalui Serial Monitor (UART), serta bagaimana membaca nilai sensor analog (potensiometer) dan mentransmisikan datanya secara sinkron ke dalam modul display eksternal seperti LCD I2C.
+
+---
+## 🔬 Analisis Percobaan 1 (ADC)
+### 1. Fungsi Perintah analogRead() pada Rangkaian Praktikum
+Implementasi fungsi analogRead() pada platform Arduino diaplikasikan untuk melakukan akuisisi data tegangan dari pin input analog, semisal pada terminal A0 yang terintegrasi dengan komponen potensiometer. Arsitektur mikrokontroler ini dilengkapi dengan modul Analog to Digital Converter (ADC) yang memiliki spesifikasi resolusi sebesar 10-bit. Secara teknis, mekanisme tersebut berperan dalam mentransformasikan fluktuasi level tegangan antara 0V hingga 5V menjadi representasi data digital diskrit dalam rentang numerik 0 sampai dengan 1023.
+### 2. Mengapa Diperlukan Fungsi map() dalam Program?
+Fungsi map() digunakan untuk penskalaan nilai secara proporsional.
+ADC menghasilkan nilai 0-1023, sedangkan motor servo memerlukan input 0-180 derajat. Tanpa konversi, nilai ADC yang melebihi batas akan menyebabkan malfungsi pada servo. Oleh karena itu, map() menyesuaikan rentang input (0-1023) menjadi rentang output yang valid (0-180).
+### 3.   Program Modifikasi (Servo bergerak pada rentang 30° hingga 150°)
+```#include <Servo.h> // library untuk servo motor
+
+Servo myservo; // membuat objek servo
+
+// ===================== PIN SETUP =====================
+// Tentukan pin yang digunakan untuk potensiometer dan servo
+const int potensioPin = A0;   // pin analog input untuk potensiometer
+const int servoPin = 9;       // pin digital untuk servo (PWM)
+
+// ===================== VARIABEL =====================
+// Variabel untuk menyimpan data ADC dan sudut servo
+int pos = 0; // inisialisasi awal variabel posisi sudut servo
+int val = 0; // inisialisasi awal variabel data bacaan ADC
 
 void setup() {
-  myservo.attach(9); // Servo terhubung ke pin PWM
+  // Hubungkan servo ke pin yang sudah ditentukan
+  myservo.attach(servoPin); 
+
+  // Aktifkan komunikasi serial untuk monitoring
+  Serial.begin(9600); 
 }
 
 void loop() {
-  val = analogRead(potPin);            // Membaca nilai ADC (0-1023)
-  // Modifikasi: Membatasi rentang sudut ke 30-150 derajat
-  val = map(val, 0, 1023, 30, 150);     
-  myservo.write(val);                  
-  delay(15);                           
+  // ===================== PEMBACAAN ADC =====================
+  // Baca nilai dari potensiometer (rentang 0–1023)
+  val = analogRead(potensioPin); 
+
+  // ===================== KONVERSI DATA =====================
+  // Ubah nilai ADC menjadi sudut servo modifikasi (30–150 derajat)
+  pos = map(val, 0, 1023, 30, 150);  
+
+  // ===================== OUTPUT SERVO =====================
+  // Gerakkan servo sesuai hasil mapping
+  myservo.write(pos); 
+
+  // ===================== MONITORING DATA =====================
+  // Tampilkan data ADC dan sudut servo ke Serial Monitor
+  Serial.print("ADC Potensio: ");
+  Serial.print(val); 
+
+  Serial.print(" | Sudut Servo: ");
+  Serial.println(pos); 
+
+  // ===================== STABILISASI =====================
+  // Delay untuk memberi waktu servo bergerak stabil
+  delay(15); 
 }
 ```
+
 ---
 ## Analisa Percobaan 2
-### 1. Gambarkan rangkaian schematic 5 LED running yang digunakan pada percobaan!
-![LED Circuit](skematikp2)
-### 2. Jelaskan bagaimana program membuat efek LED berjalan dari kiri ke kanan!
-Ketika program menyalakan pin 7 maka program akan beralih ke loppingan for yang kedua dimana isinya dalah mengurangi pin output sehingga pin yang aktif adalah dari kiri ke kanan.
-### 3.Jelaskan bagaimana program membuat LED kembali dari kanan ke kiri!
-Porogram menjalankan looping for pertama yang mengaktifkan pin 2 hingga ke 8
-### 4.Buatkan program agar LED menyala tiga LED kanan dan tiga LED kiri secara bergantian  dan berikan penjelasan disetiap baris kode nya dalam bentuk README.md!
-```cpp
-int timer = 100;           
-// delay. Semakin tinggi angkanya, semakin lambat waktunya. 
-void setup() { 
-// gunakan loop for untuk menginisialisasi setiap pin sebagai 
-output: 
-for (int ledPin = 2; ledPin < 4; ledPin++) { 
-pinMode(ledPin, OUTPUT); 
-} 
-} 
-void loop() { 
-// looping dari pin rendah ke tinggi 
-for (int ledPin = 2; ledPin < 4; ledPin++) { 
-// hidupkan LED pin nya: 
-digitalWrite(ledPin, HIGH); 
-delay(timer); 
-// matikan pin LED nya: 
-digitalWrite(ledPin, LOW); 
+### 1. Mengapa LED dapat diatur kecerahannya menggunakan fungsi analogWrite()?
+Fungsi analogWrite() tidak benar-benar mengeluarkan tegangan analog murni, melainkan menggunakan teknik PWM (Pulse Width Modulation). PWM memanipulasi sinyal digital (HIGH dan LOW) dengan cara mengatur seberapa lama sinyal berada dalam keadaan HIGH (menyala) dalam satu periode waktu tertentu, yang disebut sebagai duty cycle.
+
+Dengan mengubah persentase duty cycle, Arduino dapat mengubah nilai "tegangan rata-rata" yang diterima oleh LED. Jika duty cycle besar (HIGH lebih lama daripada LOW), maka tegangan rata-rata akan tinggi dan LED menyala terang. Sebaliknya, jika duty cycle kecil, tegangan rata-rata menjadi rendah dan LED terlihat meredup. Mata manusia tidak bisa melihat kedipan sinyal digital yang sangat cepat ini, sehingga yang terlihat hanyalah perubahan intensitas cahaya (analog semu).
+### 2.  Hubungan antara nilai ADC (0–1023) dan nilai PWM (0–255)
+Korelasi keduanya berpijak pada perbedaan resolusi perangkat keras Arduino Uno:
+ADC memiliki resolusi 10-bit (0-1023).
+PWM memiliki resolusi 8-bit (0-255).
+Akibat perbedaan ini, nilai ADC harus diskalakan melalui fungsi map() atau pembagian dengan 4 agar sesuai dengan rentang output PWM.
+### 3.Program Modifikasi (LED hanya menyala pada rentang PWM 50-200)
+```#include <Arduino.h> 
+
+// ===================== PIN SETUP =====================
+const int potPin = A0;   // pin analog untuk membaca potensiometer
+const int ledPin = 9;    // pin digital PWM untuk output ke LED
+
+// ===================== VARIABEL =====================
+int nilaiADC = 0;  
+int pwm = 0;       
+
+void setup() {
+  // Atur pin LED sebagai output
+  pinMode(ledPin, OUTPUT);
+
+  // Aktifkan komunikasi serial
+  Serial.begin(9600); 
 }
-for (int ledPin = 3; ledPin >= 2; ledPin--) { 
-// menghidupkan pin: 
-digitalWrite(ledPin, HIGH); 
-delay(timer); 
-// mematikan pin: 
-digitalWrite(ledPin, LOW); 
-} 
+
+void loop() {
+  // ===================== PEMBACAAN SENSOR =====================
+  nilaiADC = analogRead(potPin); 
+
+  // ===================== PEMROSESAN DATA =====================
+  // Mapping dasar dari rentang ADC ke rentang PWM maksimal
+  pwm = map(nilaiADC, 0, 1023, 0, 255);  
+
+  // ===================== LOGIKA MODIFIKASI =====================
+  // LED hanya menyala jika nilai PWM berada di antara 50 dan 200
+  if (pwm >= 50 && pwm <= 200) {
+    analogWrite(ledPin, pwm); // LED menyala sesuai kecerahan PWM saat ini
+  } else {
+    analogWrite(ledPin, 0);   // Di luar rentang 50-200, matikan LED (PWM = 0)
+  }
+
+  // ===================== MONITORING DATA =====================
+  Serial.print("ADC: ");
+  Serial.print(nilaiADC); 
+
+  Serial.print(" | PWM Awal: ");
+  Serial.print(pwm); 
+  
+  Serial.print(" | Status LED: ");
+  if (pwm >= 50 && pwm <= 200) {
+    Serial.println("MENYALA");
+  } else {
+    Serial.println("MATI");
+  }
+
+  // Delay untuk stabilisasi
+  delay(50); 
 }
 ```
-Program tetap sama hanya saja wiringnya dijadikan 1 sehingga tetap bisa menghasilkan output yang sama berikut adalah Wiringnya
-![LED Pararel](wiringp3)
 
 
 
-## 📁 Penjelasan File Program
 
-### 1. `Praktikum_Percobaan_1.ino` (Percabangan)
-**Tujuan Kode:** File ini berisi program untuk mendemonstrasikan fungsi struktur logika percabangan menggunakan instruksi `if-else`. Program ini bertujuan untuk mengevaluasi kondisi parameter batas waktu tunda (*delay*) dan secara dinamis mengubah kecepatan fase kedipan sebuah LED tunggal tanpa memerlukan intervensi manual dari pengguna. Pada tugas modifikasi praktikum ini, program dirancang agar siklus nyala LED berubah secara bertahap: mulai dari fase berkedip cepat, kemudian memelan (kecepatan sedang), dan pada akhirnya sistem akan menahan LED dalam kondisi mati secara permanen (*reset*).
-
-### 2. `Modul_1_Percobaann_2.ino` (Perulangan)
-**Tujuan Kode:** File ini berisi program untuk mendemonstrasikan efisiensi struktur kendali perulangan menggunakan instruksi `for` *loop*. Program ini bertujuan untuk memanipulasi rentetan banyak pin digital secara otomatis hanya dengan sedikit baris kode guna menciptakan efek visual pergerakan cahaya pada susunan enam buah LED. Pada tugas modifikasi praktikum ini, instruksi perulangan direkayasa untuk membagi deretan 6 LED menjadi dua blok terpisah (3 LED di sisi kiri dan 3 LED di sisi kanan), di mana program akan memerintahkan kedua kelompok tersebut untuk menyala secara bergantian secara terus-menerus.
 
 ---
 
